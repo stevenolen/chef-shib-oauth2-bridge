@@ -1,0 +1,42 @@
+<VirtualHost *:80>
+ServerName shiboauth2bridge
+DocumentRoot /var/www/<%= @name %>
+
+
+<Directory /var/www/auth/public>
+  Options FollowSymLinks
+  AllowOverride All
+    Order allow,deny
+    Allow from all
+</Directory>
+
+<Directory />
+Options FollowSymLinks
+AllowOverride None
+</Directory>
+
+<Location /server-status>
+SetHandler server-status
+
+  Order Deny,Allow
+  Deny from all
+  Allow from 127.0.0.1
+
+</Location>
+
+<IfModule mod_shib>
+  <Location /oauth2/authorize>
+    AuthType shibboleth
+    ShibRequireSession On
+    ShibUseHeaders On
+    require valid-user
+  </Location>
+</IfModule>
+
+RewriteEngine On
+
+RewriteCond %{DOCUMENT_ROOT}/system/maintenance.html -f
+RewriteCond %{SCRIPT_FILENAME} !maintenance.html
+RewriteRule ^.*$ /system/maintenance.html [L]
+
+</VirtualHost>
