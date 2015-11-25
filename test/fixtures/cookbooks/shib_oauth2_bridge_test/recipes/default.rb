@@ -1,4 +1,5 @@
 include_recipe 'shib-oauth2-bridge::shibd'
+package 'git'
 
 mysql_service 'default' do
   port '3306'
@@ -18,7 +19,21 @@ yum_repository 'epel' do
   action :create
 end
 
-%w(php php-mcrypt php-mysql).each do |pkg|
+yum_repository 'remi' do
+  description 'Les RPM de Remi - Repository'
+  mirrorlist 'http://rpms.famillecollet.com/enterprise/6/remi/mirror'
+  gpgkey 'http://rpms.famillecollet.com/RPM-GPG-KEY-remi'
+  action :create
+end
+
+yum_repository 'remi-php55' do
+  description 'Les RPM de Remi PHP55 - Repository'
+  mirrorlist 'http://rpms.famillecollet.com/enterprise/6/php55/mirror'
+  gpgkey 'http://rpms.famillecollet.com/RPM-GPG-KEY-remi'
+  action :create
+end
+
+%w(php php-mcrypt php-mysql php-mbstring).each do |pkg|
   package pkg
 end
 
