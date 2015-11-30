@@ -24,6 +24,10 @@ class Chef
           instance httpd_service_name
           action :create
         end
+
+        link '/usr/lib64/httpd/modules/mod_shib.so' do
+          to '/usr/lib64/shibboleth/mod_shib_22.so'
+        end
         
         httpd_config 'shib-bridge' do
           instance httpd_service_name
