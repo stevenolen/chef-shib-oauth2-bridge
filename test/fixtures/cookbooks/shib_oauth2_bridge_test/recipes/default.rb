@@ -37,4 +37,8 @@ end
   package pkg
 end
 
-shib_oauth2_bridge 'default'
+shib_oauth2_bridge 'default' do
+  clients [
+    {id: 'app', name: 'app', secret: 'appsecret', redirect_uri: 'http://localhost:3000/auth/oauth2/shibboleth'}
+  ]
+end

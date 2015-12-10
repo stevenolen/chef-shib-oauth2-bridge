@@ -1,10 +1,10 @@
 LoadModule mod_shib /usr/lib64/httpd/modules/mod_shib.so
-<VirtualHost *:80>
-ServerName shiboauth2bridge
+<VirtualHost *:<%= @port %>>
+ServerName <%= @hostname %>
 DocumentRoot /var/www/<%= @name %>/current
 
 
-<Directory /var/www/auth/public>
+<Directory /var/www/<%= @name %>/current/public>
   Options FollowSymLinks
   AllowOverride All
     Order allow,deny

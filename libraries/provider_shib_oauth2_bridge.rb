@@ -1,5 +1,5 @@
 require 'chef/provider/lwrp_base'
-# require_relative 'helpers'
+require_relative 'helpers'
 
 class Chef
   class Provider
@@ -12,11 +12,12 @@ class Chef
       end
 
       # Mix in helpers from libraries/helpers.rb
-      # include ShibOauth2BridgeCookbook::Helpers
+      include ShibOauth2BridgeCookbook::Helpers
 
       action :create do
         httpd_service_name = 'shib-oauth2-bridge-' + new_resource.name
         httpd_service httpd_service_name do
+          listen_ports ["#{new_resource.port}"]
           action [:create, :start]
         end
 
@@ -34,9 +35,11 @@ class Chef
           source 'auth.conf.erb'
           cookbook 'shib-oauth2-bridge'
           variables(
-            name: httpd_service_name
+            name: httpd_service_name,
+            hostname: new_resource.hostname,
+            port: new_resource.port
           )
-          # notifies :restart, "service[httpd-#{httpd_service_name}]"
+          notifies :restart, "httpd_service[#{httpd_service_name}]"
           action :create
         end
 
@@ -57,7 +60,7 @@ class Chef
         template "#{app_path}/shared/config/app.php" do
           source 'app.php.erb'
           cookbook 'shib-oauth2-bridge'
-          # notifies :restart, "service[]", :delayed
+          notifies :restart, "httpd_service[#{httpd_service_name}]"
         end
 
         # database.php
@@ -71,7 +74,7 @@ class Chef
             db_host: new_resource.db_host,
             db_port: new_resource.db_port
           )
-          # notifies :restart, "service[]", :delayed
+          notifies :restart, "httpd_service[#{httpd_service_name}]"
         end
 
         bridge_resource = new_resource
@@ -89,15 +92,22 @@ class Chef
           migrate true
           migration_command "php composer.phar install; php artisan migrate --package='lucadegasperi/oauth2-server-laravel' --env=local; php artisan migrate --env=local"
           purge_before_symlink %w(config/local vendor storage)
-          #before_symlink do
-          #  execute 'db:seed' do
-          #    environment 'PATH' => computed_path
-          #    cwd release_path
-          #    command "RAILS_ENV=#{ucnext_resource.rails_env} bundle exec rake db:seed; touch #{ucnext_resource.deploy_path}/shared/.seeded"
-          #    not_if { ::File.exist?("#{ucnext_resource.deploy_path}/shared/.seeded") }
-          #  end
-          #end
-          #restart_command "service ucnext-#{ucnext_resource.name} restart"
+          before_symlink do
+            execute 'db:seed' do
+              cwd release_path
+              command "php artisan db:seed --env=local; touch #{app_path}/shared/.seeded"
+              not_if { ::File.exist?("#{app_path}/shared/.seeded") }
+            end
+          end
+          restart_command "service httpd-#{httpd_service_name} restart"
+        end
+
+        # insert clients into db. wow this is awkward.
+        new_resource.clients.each do |c|
+          execute "insert client" do
+            command insert_client_query(c)
+            not_if { client_exists?(c) }
+          end
         end
       end
     end
