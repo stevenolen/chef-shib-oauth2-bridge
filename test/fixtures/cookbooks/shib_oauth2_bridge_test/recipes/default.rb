@@ -1,5 +1,5 @@
 include_recipe 'shib-oauth2-bridge::shibd'
-package 'git'
+include_recipe 'shib-oauth2-bridge::shib-ds'
 
 mysql_service 'default' do
   port '3306'

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  UCSD Shibboleth SP Configuration   
+  Minimum Shibboleth SP Version 2.5 
+  Original Source: shibboleth2.xml created by shibboleth-sp-2.5.2-win64.msi 
+  Adjusted by UCSD's ShibReg utility
+  Maintained by: 
+--><SPConfig xmlns="urn:mace:shibboleth:2.0:native:sp:config" xmlns:conf="urn:mace:shibboleth:2.0:native:sp:config" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" clockSkew="180">
+
+
+
+
+    <!--
+    By default, in-memory StorageService, ReplayCache, ArtifactMap, and SessionCache
+    are used. See example-shibboleth2.xml for samples of explicitly configuring them.
+    -->
+
+    <!--
+  To specify UCSD authenticators two steps are required, requesting specific authenticators
+  and verifying that one of them was actually used, the two lists should always be
+  synchronized. Requesting is done with an attribute on the Host or Path.  Validation is 
+  done with Rule elements in the AccessControl node.
+  
+  Example requesting/requiring ActiveDirectory and BusinessSystems:
+    <Host name="mySP.ucsd.edu" requireSession="true" 
+              authnContextClassRef="urn:mace:ucsd.edu:sso:ad urn:mace:ucsd.edu:sso:actsso">
+      <AccessControl>
+        <OR>
+          <Rule require="authnContextClassRef">urn:mace:ucsd.edu:sso:ad</Rule>
+          <Rule require="authnContextClassRef">urn:mace:ucsd.edu:sso:actsso</Rule>
+        </OR>
+      </AccessControl>
+    </Host>
+  
+  The available Authenticators are:
+    Business Systems :  urn:mace:ucsd.edu:sso:actsso
+    Active Directory :  urn:mace:ucsd.edu:sso:ad
+    Student :     urn:mace:ucsd.edu:sso:studentsso
+    Kerberos:     urn:mace:ucsd.edu:sso:acskerb
+    Summer Student :  urn:mace:ucsd.edu:sso:hybridstudent
+    Student Applicant:  urn:mace:ucsd.edu:sso:applicantsso
+    UC Trust:     urn:mace:ucsd.edu:sso:uctrust
+    -->
+
+    <!--
+    To customize behavior for specific resources on IIS, and to link vhosts or
+    resources to ApplicationOverride settings below, use the XML syntax below.
+    See https://wiki.shibboleth.net/confluence/display/SHIB2/NativeSPRequestMapHowTo for help.
+
+    Apache users should rely on web server options/commands in most cases, and can remove the
+    RequestMapper element. See https://wiki.shibboleth.net/confluence/display/SHIB2/NativeSPApacheConfig
+    -->
+    <RequestMapper type="Native">
+        <RequestMap applicationId="default">
+            <!--
+            The example requires a session for documents in /secure on the containing host with http and
+            https on the default ports. Note that the name and port in the <Host> elements MUST match
+            Apache's ServerName and Port directives or the IIS Site name in the <ISAPI> element above.
+            -->
+            <Host name="ucnext.org" authType="shibboleth" requireSession="true" >
+            </Host>
+            <!-- Example of a second vhost mapped to a different applicationId. -->
+            <!--
+            <Host name="admin.example.org" applicationId="admin" authType="shibboleth" requireSession="true"/>
+            -->
+        </RequestMap>
+    </RequestMapper>
+
+    <!--
+    The ApplicationDefaults element is where most of Shibboleth's SAML bits are defined.
+    Resource requests are mapped by the RequestMapper to an applicationId that
+    points into to this section (or to the defaults here).
+    
+    The REMOTE_USER attribute on Applications defines which shibboleth attribute is sent as REMOTE_USER
+      e.g. REMOTE_USER="eppn"
+    -->
+
+    <ApplicationDefaults entityID="https://ucnext.ucsd.edu/shibboleth" REMOTE_USER="SHIB_EPPN">
+
+        <!--
+        Controls session lifetimes, address checks, cookie handling, and the protocol handlers.
+        You MUST supply an effectively unique handlerURL value for each of your applications.
+        The value defaults to /Shibboleth.sso, and should be a relative path, with the SP computing
+        a relative value based on the virtual host. Using handlerSSL="true", the default, will force
+        the protocol to be https. You should also set cookieProps to "https" for SSL-only sites.
+        Note that while we default checkAddress to "false", this has a negative impact on the
+        security of your site. Stealing sessions via cookie theft is much easier with this disabled.
+        -->
+        <Sessions lifetime="7200" timeout="3600" checkAddress="false" handlerSSL="false" cookieProps="http" idpHistory="true" idpHistoryDays="7">
+
+            <!--
+            Configures SSO for a default IdP. To allow for >1 IdP, remove
+            entityID property and adjust discoveryURL to point to discovery service.
+            (Set discoveryProtocol to "WAYF" for legacy Shibboleth WAYF support.)
+            You can also override entityID on /Login query string, or in RequestMap/htaccess.
+            -->
+            <SSO discoveryProtocol="SAMLDS" discoveryURL="https://ucnext.org/ds/index.html">
+              SAML2 SAML1
+           </SSO>
+
+            <!-- SAML and local-only logout. -->
+            <Logout>SAML2 Local</Logout>
+
+            <!-- Extension service that generates "approximate" metadata based on SP configuration. -->
+            <Handler type="MetadataGenerator" Location="/Metadata" signing="false" />
+
+            <!-- Status reporting service. -->
+            <Handler type="Status" Location="/Status" acl="127.0.0.1 ::1" />
+
+            <!-- Session diagnostic service. -->
+            <Handler type="Session" Location="/Session" showAttributeValues="false" />
+
+            <!-- JSON feed of discovery information. -->
+            <Handler type="DiscoveryFeed" Location="/DiscoFeed"/>
+        </Sessions>
+
+        <!--
+        Allows overriding of error template information/filenames. You can
+        also add attributes with values that can be plugged into the templates.
+        -->
+        <Errors supportContact="root@localhost" helpLocation="/about.html" styleSheet="/shibboleth-sp/main.css" logoLocation="/doc/shibboleth/logo.jpg" />
+
+    <MetadataProvider type="Chaining">
+            <!-- Production metadata for UCSD -->
+            <MetadataProvider type="XML" uri="https://a4.ucsd.edu/incommon/InCommon-metadata.xml" backingFilePath="InCommon-metadata.xml" reloadInterval="7200">
+        <MetadataFilter type="Whitelist">
+          <Include>urn:mace:incommon:berkeley.edu</Include>
+          <Include>urn:mace:incommon:ucdavis.edu</Include>
+          <Include>urn:mace:incommon:uci.edu</Include>
+          <Include>urn:mace:incommon:ucla.edu</Include>
+          <Include>urn:mace:incommon:ucmerced.edu</Include>
+          <Include>urn:mace:incommon:ucr.edu</Include>
+          <Include>urn:mace:incommon:ucsb.edu</Include>
+          <Include>urn:mace:incommon:ucsc.edu</Include>
+          <Include>urn:mace:incommon:ucsf.edu</Include>
+          <Include>urn:mace:incommon:lbl.gov</Include>
+          <Include>urn:mace:incommon:ucop.edu</Include>
+          <Include>urn:mace:incommon:ucsd.edu</Include>
+          <Include>https://shibboleth.uchastings.edu/idp/shibboleth</Include>
+        </MetadataFilter>
+            </MetadataProvider>
+
+            <!-- UCSD's test metadata.  Should be commented out for production deployment -->
+            <!-- 
+            <MetadataProvider type="XML" file="test-idp-metadata.xml" />
+             -->
+        </MetadataProvider>
+
+        <!-- Map to extract attributes from SAML assertions. -->
+        <AttributeExtractor type="XML" validate="true" reloadChanges="false" path="attribute-map.xml" />
+
+        <!-- Use a SAML query if no attributes are supplied during SSO. -->
+        <AttributeResolver type="Query" subjectMatch="true" />
+
+        <!-- Default filtering policy for recognized attributes, lets other data pass. -->
+        <!-- <AttributeFilter type="XML" validate="true" path="attribute-policy.xml"/> -->
+
+        <!-- Simple file-based resolver for using a single keypair. -->
+        <CredentialResolver type="File" key="sp-key.pem" certificate="sp-cert.pem" />
+
+        <!--
+        The default settings can be overridden by creating ApplicationOverride elements (see
+        the https://wiki.shibboleth.net/confluence/display/SHIB2/NativeSPApplicationOverride topic).
+        Resource requests are mapped by web server commands, or the RequestMapper, to an
+        applicationId setting.
+        
+        Example of a second application (for a second vhost) that has a different entityID.
+        Resources on the vhost would map to an applicationId of "admin":
+        -->
+        <!--
+        <ApplicationOverride id="admin" entityID="https://admin.example.org/shibboleth"/>
+        -->
+    </ApplicationDefaults>
+
+    <!-- Policies that determine how to process and authenticate runtime messages. -->
+    <SecurityPolicyProvider type="XML" validate="true" path="security-policy.xml" />
+
+    <!-- Low-level configuration about protocols and bindings available for use. -->
+    <ProtocolProvider type="XML" validate="true" reloadChanges="false" path="protocols.xml" />
+
+</SPConfig>
