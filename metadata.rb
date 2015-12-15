@@ -6,4 +6,4 @@ description 'Installs/Configures shib-oauth2-bridge'
 long_description 'Installs/Configures shib-oauth2-bridge'
 version '0.1.4'
 
-depends 'httpd', '~> 0.3.2'
+depends 'httpd', '= 0.3.1'

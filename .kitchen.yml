@@ -10,7 +10,7 @@ provisioner:
   name: chef_zero
 
 platforms:
-  - name: centos-6.4
+  - name: centos-6.7
 
 dns:
   - 8.8.8.8
