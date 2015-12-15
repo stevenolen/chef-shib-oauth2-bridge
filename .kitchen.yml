@@ -2,7 +2,7 @@
 driver:
   name: docker
 driver_config:
-  require_chef_omnibus: true
+  require_chef_omnibus: 12.4.1
   use_sudo: false
   privileged: true # shibd silently fails without priv container!
 
