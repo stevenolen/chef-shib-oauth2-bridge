@@ -2,7 +2,7 @@ source 'https://supermarket.chef.io'
 
 metadata
 
-cookbook 'httpd', '= 0.3.1'
+cookbook 'httpd', '~> 0.3.3', git: 'https://github.com/stevenolen/httpd.git'
 
 group :integration do
   cookbook 'mysql', '~> 6.0'
