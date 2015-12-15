@@ -17,7 +17,7 @@ class Chef
       action :create do
         httpd_service_name = 'shib-oauth2-bridge-' + new_resource.name
         httpd_service httpd_service_name do
-          listen_ports ["#{new_resource.port}"]
+          listen_ports [new_resource.port]
           action [:create, :start]
         end
 
