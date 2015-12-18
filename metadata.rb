@@ -4,6 +4,6 @@ maintainer_email 'technolengy@gmail.com'
 license 'Apache 2.0'
 description 'Installs/Configures shib-oauth2-bridge'
 long_description 'Installs/Configures shib-oauth2-bridge'
-version '0.1.10'
+version '0.1.11'
 
 depends 'httpd', '~> 0.3.3'

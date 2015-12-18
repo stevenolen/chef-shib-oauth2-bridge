@@ -4,6 +4,12 @@ ServerName https://<%= @hostname %>
 UseCanonicalName On
 DocumentRoot /var/www/<%= @name %>/current/public
 
+<IfModule php5_module>
+    <FilesMatch "\.(php|phps|php5|phtml)$">
+        SetHandler php5-script
+    </FilesMatch>
+    DirectoryIndex index.php
+</IfModule>
 
 <Directory /var/www/<%= @name %>/current/public>
   Options FollowSymLinks
