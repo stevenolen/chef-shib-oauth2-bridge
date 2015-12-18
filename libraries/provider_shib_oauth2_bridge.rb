@@ -115,8 +115,8 @@ class Chef
           deploy_to app_path
           repo bridge_resource.repo
           revision bridge_resource.revision
-          user ucnext_resource.run_user
-          group ucnext_resource.run_group
+          user bridge_resource.run_user
+          group bridge_resource.run_group
           symlink_before_migrate(
             'config/app.php' => 'app/config/local/app.php',
             'config/database.php' => 'app/config/local/database.php',
