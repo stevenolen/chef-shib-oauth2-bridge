@@ -2,6 +2,7 @@ LoadModule mod_shib /usr/lib64/httpd/modules/mod_shib.so
 <VirtualHost *:<%= @port %>>
 ServerName https://<%= @hostname %>
 UseCanonicalName On
+SetEnv HTTPS On
 DocumentRoot /var/www/<%= @name %>/current/public
 
 <IfModule php5_module>
