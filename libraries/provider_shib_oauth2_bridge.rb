@@ -18,6 +18,7 @@ class Chef
         httpd_service_name = 'shib-oauth2-bridge-' + new_resource.name
         httpd_service httpd_service_name do
           listen_ports ["#{new_resource.port}"]
+          mpm 'prefork'
           action [:create, :start]
         end
 
