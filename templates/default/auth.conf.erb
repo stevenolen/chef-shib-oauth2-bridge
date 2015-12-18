@@ -1,7 +1,8 @@
 LoadModule mod_shib /usr/lib64/httpd/modules/mod_shib.so
 <VirtualHost *:<%= @port %>>
-ServerName <%= @hostname %>
-DocumentRoot /var/www/<%= @name %>/current
+ServerName https://<%= @hostname %>
+UseCanonicalName On
+DocumentRoot /var/www/<%= @name %>/current/public
 
 
 <Directory /var/www/<%= @name %>/current/public>
@@ -23,6 +24,11 @@ SetHandler server-status
   Deny from all
   Allow from 127.0.0.1
 
+</Location>
+
+<Location /Shibboleth.sso>
+   Satisfy Any
+   Allow from all
 </Location>
 
 <% if node.recipes.include?('shib-oauth2-bridge::shib-ds') %>
