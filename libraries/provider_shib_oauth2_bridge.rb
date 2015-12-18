@@ -15,10 +15,24 @@ class Chef
       include ShibOauth2BridgeCookbook::Helpers
 
       action :create do
+        group "#{new_resource.name} :create group" do
+          append true
+          group_name new_resource.run_group
+          action :create
+        end
+
+        user "#{new_resource.name} :create user" do
+          username new_resource.run_user
+          gid 'bridge' if new_resource.run_user == 'bridge'
+          action :create
+        end
+
         httpd_service_name = 'shib-oauth2-bridge-' + new_resource.name
         httpd_service httpd_service_name do
           listen_ports ["#{new_resource.port}"]
           mpm 'prefork'
+          run_user new_resource.run_user
+          run_group new_resource.run_group
           action [:create, :start]
         end
 
@@ -50,9 +64,18 @@ class Chef
         end
 
         app_path = "/var/www/#{httpd_service_name}"
+
+        directory app_path do
+          recursive true
+          user new_resource.run_user
+          group new_resource.run_group
+        end
+
         %w(config/local vendor storage).each do |d|
           directory "#{app_path}/shared/#{d}" do
             recursive true
+            user new_resource.run_user
+            group new_resource.run_group
           end
         end
 
@@ -65,6 +88,8 @@ class Chef
         # app.php
         template "#{app_path}/shared/config/app.php" do
           source 'app.php.erb'
+          owner new_resource.run_user
+          group new_resource.run_group
           cookbook 'shib-oauth2-bridge'
           notifies :restart, "httpd_service[#{httpd_service_name}]"
         end
@@ -72,6 +97,8 @@ class Chef
         # database.php
         template "#{app_path}/shared/config/database.php" do
           source 'database.php.erb'
+          owner new_resource.run_user
+          group new_resource.run_group
           cookbook 'shib-oauth2-bridge'
           variables(
             db_password: new_resource.db_password,
@@ -88,6 +115,8 @@ class Chef
           deploy_to app_path
           repo bridge_resource.repo
           revision bridge_resource.revision
+          user ucnext_resource.run_user
+          group ucnext_resource.run_group
           symlink_before_migrate(
             'config/app.php' => 'app/config/local/app.php',
             'config/database.php' => 'app/config/local/database.php',
