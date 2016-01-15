@@ -124,7 +124,7 @@ class Chef
             'vendor' => 'vendor',
             'storage' => 'app/storage'
           )
-          symlink({})
+          symlinks({})
           migrate true
           migration_command "php composer.phar install; php artisan migrate --package='lucadegasperi/oauth2-server-laravel' --env=local; php artisan migrate --env=local"
           purge_before_symlink %w(config/local vendor storage)
