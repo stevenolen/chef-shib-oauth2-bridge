@@ -23,10 +23,7 @@
 
     <RequestMapper type="Native">
         <RequestMap applicationId="default">
-            <Host
-                name="onlinepoll.ucla.edu"
-                port="8443"
-                >
+            <Host name="onlinepoll.ucla.edu">
                     <Path name="/oauth2/authorize" authType="shibboleth" requireSessionWith="default" exportAssertion="true"/>
             </Host>
         </RequestMap>
@@ -34,7 +31,7 @@
 
     <ApplicationDefaults id="default" policyId="default"
         entityID="https://onlinepoll.ucla.edu"
-        homeURL="https://onlinepoll.ucla.edu:8443"
+        homeURL="https://onlinepoll.ucla.edu"
         REMOTE_USER="SHIB_eduPersonPrincipalName"
         signing="false" encryption="false">
 
