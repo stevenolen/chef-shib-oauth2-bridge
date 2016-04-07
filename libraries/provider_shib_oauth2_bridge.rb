@@ -67,14 +67,20 @@ class Chef
 
         directory app_path do
           recursive true
-          user new_resource.run_user
+          owner new_resource.run_user
+          group new_resource.run_group
+        end
+
+        directory "#{app_path}/shared" do
+          recursive true
+          owner new_resource.run_user
           group new_resource.run_group
         end
 
         %w(config/local vendor storage).each do |d|
           directory "#{app_path}/shared/#{d}" do
             recursive true
-            user new_resource.run_user
+            owner new_resource.run_user
             group new_resource.run_group
           end
         end
