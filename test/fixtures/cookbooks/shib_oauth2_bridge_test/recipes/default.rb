@@ -33,6 +33,7 @@ end
 
 shib_oauth2_bridge 'default' do
   clients [
-    {id: 'app', name: 'app', secret: 'appsecret', redirect_uri: 'http://localhost:3000/auth/oauth2/shibboleth'}
+    {id: 'app', name: 'app', secret: 'appsecret', redirect_uri: 'http://localhost:3000/auth/oauth2/shibboleth'},
+    {id: 'app2', name: 'app2', secret: 'appsecret', redirect_uri: ['http://example.com', 'http://example.com/2']}
   ]
 end
